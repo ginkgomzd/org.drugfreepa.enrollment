@@ -23,10 +23,10 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
   }
 
   /**
-   * Example: Run a simple query when a module is enabled
-   *
+   * Enable CiviCase on enable.
+   */
   public function enable() {
-    CRM_Core_DAO::executeQuery('UPDATE foo SET is_active = 1 WHERE bar = "whiz"');
+    $this->setComponentStatuses(array('CiviCase' => TRUE));
   }
 
   /**
