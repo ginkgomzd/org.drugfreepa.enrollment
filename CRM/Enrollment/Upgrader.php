@@ -44,8 +44,9 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
    * from the HRCase extension.
    *
    * @param array $components keys are component names (e.g. "CiviMail"); values are booleans
+   * @throws CRM_Core_Exception
    */
-  public function setComponentStatuses($components) {
+  private function setComponentStatuses($components) {
     $getResult = civicrm_api3('setting', 'getsingle', array(
       'domain_id' => CRM_Core_Config::domainID(),
       'return' => array('enable_components'),
