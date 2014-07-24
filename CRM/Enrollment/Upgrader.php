@@ -9,10 +9,21 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
 
   /**
-   * Example: Run an external SQL script when the module is installed
    *
+   */
   public function install() {
-    $this->executeSqlFile('sql/myinstall.sql');
+
+    $typesConf = array(
+      'checklist' => 'Enrollment Checklist',
+      'policy'    => 'Drugfree Policy Draft',
+      'Policy accepted' => 'Drugfree Policy Accepted',
+      'testing_login' => 'Drug Testing Login',
+    );
+
+    self::createActivityTypes($typesConf);
+
+    self::createCaseType('DFWPSEnrollment', 'Workplace Policy Enrollment');
+
   }
 
   /**
@@ -34,6 +45,98 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
    *
   public function disable() {
     CRM_Core_DAO::executeQuery('UPDATE foo SET is_active = 0 WHERE bar = "whiz"');
+  }
+
+
+   */
+
+  /**
+   * Creates activity types from a list of name => labels
+   *
+   * @param assoc array $typesConf array( 'name' => 'label [...])
+   * @return array
+   * @throws CRM_Core_Exception
+   */
+  public static function createActivityTypes($typesConf) {
+    $optionGroup = civicrm_api('OptionGroup', 'Get', array(
+      'version' => 3,
+      'name' => 'activity_type',
+      'return' => 'id'
+    ));
+
+    $activityTypeIDs = array();
+    foreach ($typesConf as $activity => $label) {
+      $activityTypeIDs[] = self::safeCreateOptionValue($optionGroup, $activity, $label);
+    }
+
+    return $activityTypeIDs;
+  }
+
+  /**
+   * Create new Option Value with a check based on name.
+   * Returns the activity type ID
+   *
+   * @param array $optionGroup result
+   * @param string $typeName
+   * @param string $typeLabel
+   * @return int
+   * @throws CRM_Core_Exception
+   */
+  public static function safeCreateOptionValue($optionGroup, $typeName, $typeLabel) {
+     $optionValue = civicrm_api('OptionValue', 'Get', array(
+      'version' => 3,
+      'name' => $typeName,
+      'option_group_id' => $optionGroup['id'],
+      'return' => 'value'
+    ));
+
+    if ($optionValue['count']) {
+      $opt = current($optionValue['values']);
+      return $opt['value'];
+    } else {
+      $params = array(
+        'version' => 3,
+        'name' => $typeName,
+        'label' => ts($typeLabel, array('domain' => 'org.drugfreepa.enrollment')),
+        'option_group_id' => $optionGroup['id'],
+        'weight' => 0,
+        'is_active' => '1',
+      );
+
+      if(!CRM_Utils_Array::value('value', $params)) {
+        // learned this trick for generating a value from the CORE OptionValue, don't shoot me
+        $value = (int) CRM_Utils_Weight::getDefaultWeight('CRM_Core_DAO_OptionValue',
+          array('option_group_id' => $optionGroup['id']),
+          'CONVERT(value, DECIMAL)'
+        );
+      }
+
+      $result = civicrm_api('OptionValue', 'create',$params);
+
+      if (CRM_Utils_Array::value('is_error', $result, FALSE)) {
+        CRM_Core_Error::debug_var('safeCreateOptionValue', $result);
+        throw new CRM_Core_Exception('Failed to create Option Value');
+      }
+
+      return $result['values'][$result['id']]['value'];
+    }
+  }
+
+  /**
+   * Create a new case type, providing name and label
+   *
+   * @param string $typeName
+   * @param string $typeLabel
+   * @return type
+   */
+  public static function createCaseType( $typeName, $typeLabel) {
+    $optionGroup = civicrm_api('OptionGroup', 'Get', array(
+      'version' => 3,
+      'name' => 'case_type',
+      'return' => 'id'
+    ));
+
+    return self::safeCreateOptionValue($optionGroup, $typeName, $typeLabel);
   }
 
   /**
