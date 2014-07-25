@@ -36,13 +36,13 @@
       <name>Phone Call</name>
     </ActivityType>
     <ActivityType>
-      <name>checklist</name>
+      <name>Checklist</name>
     </ActivityType>
     <ActivityType>
-      <name>policy</name>
+      <name>Policy</name>
     </ActivityType>
     <ActivityType>
-      <name>testing_login</name>
+      <name>Testing login</name>
     </ActivityType>
 
   </ActivityTypes>
@@ -64,7 +64,7 @@
           <reference_select>newest</reference_select>
         </ActivityType>
         <ActivityType>
-          <name>checklist</name>
+          <name>Checklist</name>
           <reference_activity>Phone Call</reference_activity>
           <reference_offset>7</reference_offset>
           <reference_select>newest</reference_select>
@@ -76,7 +76,7 @@
           <reference_select>newest</reference_select>
         </ActivityType>
         <ActivityType>
-          <name>policy</name><!-- draft the policy -->
+          <name>Policy</name><!-- draft the policy -->
           <reference_activity>Phone Call</reference_activity>
           <reference_offset>1</reference_offset>
           <reference_select>newest</reference_select>
@@ -93,7 +93,7 @@
           <reference_select>newest</reference_select>
         </ActivityType>
         <ActivityType>
-          <name>testing_login</name><!-- Assign and send login credentials -->
+          <name>Testing login</name><!-- Assign and send login credentials -->
           <reference_activity>Policy accepted</reference_activity>
           <reference_offset>2</reference_offset>
           <reference_select>newest</reference_select>

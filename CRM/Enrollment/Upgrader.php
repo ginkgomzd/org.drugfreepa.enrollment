@@ -14,10 +14,10 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
   public function install() {
 
     $typesConf = array(
-      'checklist' => 'Enrollment Checklist',
-      'policy'    => 'Drugfree Policy Draft',
+      'Checklist' => 'Enrollment Checklist',
+      'Policy'    => 'Drugfree Policy Draft',
       'Policy accepted' => 'Drugfree Policy Accepted',
-      'testing_login' => 'Drug Testing Login',
+      'Testing login' => 'Drug Testing Login',
     );
 
     self::createActivityTypes($typesConf);
@@ -58,8 +58,7 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
    * @throws CRM_Core_Exception
    */
   public static function createActivityTypes($typesConf) {
-    $optionGroup = civicrm_api('OptionGroup', 'Get', array(
-      'version' => 3,
+    $optionGroup = civicrm_api3('OptionGroup', 'GetValue', array(
       'name' => 'activity_type',
       'return' => 'id'
     ));
@@ -76,50 +75,56 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
    * Create new Option Value with a check based on name.
    * Returns the activity type ID
    *
-   * @param array $optionGroup result
-   * @param string $typeName
-   * @param string $typeLabel
-   * @return int
-   * @throws CRM_Core_Exception
+   * @param array/int $optionGroup result of api OptionGroup Get, OR int Group ID
+   * @param string $optionName
+   * @param string $optionLabel
+   * @param string $newValue Optional
+   *
+   * @return int $value
+   *
+   * @throws API_Exception
    */
-  public static function safeCreateOptionValue($optionGroup, $typeName, $typeLabel) {
-     $optionValue = civicrm_api('OptionValue', 'Get', array(
+  public static function safeCreateOptionValue($optionGroup, $optionName, $optionLabel, $newValue = null) {
+
+    if (is_numeric($optionGroup)) {
+      $group_id = $optionGroup;
+    } else {
+      $group_id = $optionGroup['id'];
+    }
+
+    $optionValue = civicrm_api('OptionValue', 'GetValue', array(
       'version' => 3,
-      'name' => $typeName,
-      'option_group_id' => $optionGroup['id'],
+      'name' => $optionName,
+      'option_group_id' => $group_id,
       'return' => 'value'
     ));
 
-    if ($optionValue['count']) {
-      $opt = current($optionValue['values']);
-      return $opt['value'];
-    } else {
-      $params = array(
-        'version' => 3,
-        'name' => $typeName,
-        'label' => ts($typeLabel, array('domain' => 'org.drugfreepa.enrollment')),
-        'option_group_id' => $optionGroup['id'],
-        'weight' => 0,
-        'is_active' => '1',
-      );
-
-      if(!CRM_Utils_Array::value('value', $params)) {
-        // learned this trick for generating a value from the CORE OptionValue, don't shoot me
-        $value = (int) CRM_Utils_Weight::getDefaultWeight('CRM_Core_DAO_OptionValue',
-          array('option_group_id' => $optionGroup['id']),
-          'CONVERT(value, DECIMAL)'
-        );
-      }
-
-      $result = civicrm_api('OptionValue', 'create',$params);
-
-      if (CRM_Utils_Array::value('is_error', $result, FALSE)) {
-        CRM_Core_Error::debug_var('safeCreateOptionValue', $result);
-        throw new CRM_Core_Exception('Failed to create Option Value');
-      }
-
-      return $result['values'][$result['id']]['value'];
+    if ($optionValue['is_error'] == 0) {
+      // already exists, do nothging.
+      return $optionValue['result'];
     }
+
+    $params = array(
+      'version' => 3,
+      'name' => $optionName,
+      'label' => ts($optionLabel, array('domain' => 'org.drugfreepa.enrollment')),
+      'option_group_id' => $group_id,
+    );
+
+    if(!is_null($newValue)) {
+      $params['value'] = $newValue;
+    }
+
+    try {
+      $result = civicrm_api3('OptionValue', 'create', $params);
+    } catch (CiviCRM_API3_Exception $x) {
+      throw new API_Exception(
+        'Exception in safeCreateOptionValue. API3_Exception: '.$x->getMessage()
+        , $x->getErrorCode(), $x->getExtraParams(), $x
+        );
+    }
+
+    return $result['values'][$result['id']]['value'];
   }
 
   /**
@@ -127,7 +132,7 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
    *
    * @param string $typeName
    * @param string $typeLabel
-   * @return type
+   * @return int Case Type ID from safeCreateOptionValue()
    */
   public static function createCaseType( $typeName, $typeLabel) {
     $optionGroup = civicrm_api('OptionGroup', 'Get', array(
