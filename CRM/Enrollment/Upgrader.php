@@ -14,15 +14,17 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
   public function install() {
 
     $typesConf = array(
-      'Checklist' => 'Enrollment Checklist',
-      'Policy'    => 'Drugfree Policy Draft',
-      'Policy accepted' => 'Drugfree Policy Accepted',
-      'Testing login' => 'Drug Testing Login',
+      'Checklist' => ts('Enrollment Checklist', array('domain' => 'org.drugfreepa.enrollment')),
+      'Policy'    => ts('Drugfree Policy Draft', array('domain' => 'org.drugfreepa.enrollment')),
+      'Policy accepted' => ts('Drugfree Policy Accepted', array('domain' => 'org.drugfreepa.enrollment')),
+      'Testing login' => ts('Drug Testing Login', array('domain' => 'org.drugfreepa.enrollment')),
     );
 
     self::createActivityTypes($typesConf);
 
-    self::createCaseType('DFWPSEnrollment', 'Workplace Policy Enrollment');
+    $caseTypeLabel = ts('Workplace Policy Enrollment', array('domain' => 'org.drugfreepa.enrollment'));
+
+    self::createCaseType('DFWPSEnrollment', $caseTypeLabel);
 
   }
 
@@ -107,7 +109,7 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
     $params = array(
       'version' => 3,
       'name' => $optionName,
-      'label' => ts($optionLabel, array('domain' => 'org.drugfreepa.enrollment')),
+      'label' => $optionLabel,
       'option_group_id' => $group_id,
     );
 
