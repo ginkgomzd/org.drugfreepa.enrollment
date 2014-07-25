@@ -1,6 +1,7 @@
 <?php
 
 require_once 'enrollment.civix.php';
+require_once 'enrollment.watchers.php';
 
 /**
  * Implementation of hook_civicrm_config
