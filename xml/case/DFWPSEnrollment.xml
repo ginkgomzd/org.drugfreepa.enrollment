@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="iso-8859-1" ?><CaseType>
+  <name>Workplace Policy Enrollment</name>
+  <description>Drug Free Workplace Solutions Policy Enrollment</description>
+
+  <ActivityTypes>
+
+    <!-- Standard case-management activities -->
+    <ActivityType>
+      <name>Open Case</name>
+      <max_instances>1</max_instances>
+    </ActivityType>
+    <ActivityType>
+      <name>Follow up</name>
+    </ActivityType>
+    <!-- ActivityType>
+      <name>Change Case Type</name>
+    </ActivityType -->
+    <ActivityType>
+      <name>Change Case Status</name>
+    </ActivityType>
+    <ActivityType>
+      <name>Change Case Start Date</name>
+    </ActivityType>
+    <ActivityType>
+      <name>Link Cases</name>
+    </ActivityType>
+
+    <!-- Configurable activities -->
+    <ActivityType>
+      <name>Email</name>
+    </ActivityType>
+    <ActivityType>
+      <name>Meeting</name>
+    </ActivityType>
+    <ActivityType>
+      <name>Phone Call</name>
+    </ActivityType>
+    <ActivityType>
+      <name>Checklist</name>
+    </ActivityType>
+    <ActivityType>
+      <name>Policy</name>
+    </ActivityType>
+    <ActivityType>
+      <name>Testing login</name>
+    </ActivityType>
+
+  </ActivityTypes>
+
+  <ActivitySets>
+    <ActivitySet>
+      <name>standard_timeline</name>
+      <label>Standard Timeline</label>
+      <timeline>true</timeline>
+      <ActivityTypes>
+        <ActivityType>
+          <name>Open Case</name>
+          <status>Completed</status>
+        </ActivityType>
+        <ActivityType>
+          <name>Phone Call</name>
+          <reference_activity>Open Case</reference_activity>
+          <reference_offset>1</reference_offset>
+          <reference_select>newest</reference_select>
+        </ActivityType>
+        <ActivityType>
+          <name>Checklist</name>
+          <reference_activity>Phone Call</reference_activity>
+          <reference_offset>7</reference_offset>
+          <reference_select>newest</reference_select>
+        </ActivityType>
+        <ActivityType>
+          <name>Phone Call</name><!-- checklist still not complete? -->
+          <reference_activity>checklist</reference_activity>
+          <reference_offset>14</reference_offset>
+          <reference_select>newest</reference_select>
+        </ActivityType>
+        <ActivityType>
+          <name>Policy</name><!-- draft the policy -->
+          <reference_activity>Phone Call</reference_activity>
+          <reference_offset>1</reference_offset>
+          <reference_select>newest</reference_select>
+        </ActivityType>
+        <ActivityType>
+          <name>Follow up</name><!-- review policy with enrollee -->
+          <reference_activity>policy</reference_activity>
+          <reference_offset>1</reference_offset>
+          <reference_select>newest</reference_select>
+        </ActivityType>
+        <ActivityType>
+          <name>Policy accepted</name>
+          <reference_activity>Follow up</reference_activity>
+          <reference_select>newest</reference_select>
+        </ActivityType>
+        <ActivityType>
+          <name>Testing login</name><!-- Assign and send login credentials -->
+          <reference_activity>Policy accepted</reference_activity>
+          <reference_offset>2</reference_offset>
+          <reference_select>newest</reference_select>
+        </ActivityType>
+      </ActivityTypes>
+    </ActivitySet>
+  </ActivitySets>
+
+  <CaseRoles>
+    <!-- RelationshipType>
+      <name>Program Administrator</name>
+      <creator>1</creator>
+      <manager>1</manager>
+    </RelationshipType>
+    <RelationshipType>
+      <name>Enrollee</name>
+      <creator>0</creator>
+      <manager>0</manager>
+    </RelationshipType>
+    <RelationshipType>
+      <name>Drug Testing Provider</name>
+      <creator>0</creator>
+      <manager>0</manager>
+    </RelationshipType -->
+  </CaseRoles>
+
+</CaseType>
