@@ -4,7 +4,7 @@
  * An enrollment batch is a collection of enrollments retrieved from the queue
  */
 class CRM_Enrollment_BAO_Enrollment_Batch {
-  const contributionQueueName = 'org.drugfreepa.enrollment.contributions';
+  const CONTRIBUTION_QUEUE_NAME = 'org.drugfreepa.enrollment.contributions';
 
   /**
    * @var array of CRM_Enrollment_BAO_Enrollment objects, indexed by enrollment
@@ -22,7 +22,7 @@ class CRM_Enrollment_BAO_Enrollment_Batch {
   public static function getBatchFromQueue() {
     $batch = new CRM_Enrollment_BAO_Enrollment_Batch();
 
-    $params = array('name' => self::contributionQueueName);
+    $params = array('name' => self::CONTRIBUTION_QUEUE_NAME);
     $queueManager = new CRM_Queue_Queue_Sql($params);
 
     for ($i = $queueManager->numberOfItems(); $i > 0; $i--) {

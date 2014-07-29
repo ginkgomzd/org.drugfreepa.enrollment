@@ -40,7 +40,7 @@ function _enrollment_civicrm_post_Contribution($op, $objectName, $objectId, &$ob
     in_array($op, array('create', 'edit')) &&
     $objectRef->contribution_status_id == $completed_status_id
   ) {
-    $params = array('name' => CRM_Enrollment_BAO_Enrollment_Batch::contributionQueueName);
+    $params = array('name' => CRM_Enrollment_BAO_Enrollment_Batch::CONTRIBUTION_QUEUE_NAME);
     $queueManager = new CRM_Queue_Queue_Sql($params);
     $data = array(
       'entity_table' => 'civicrm_contribution',
