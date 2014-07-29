@@ -72,14 +72,25 @@ class CRM_Enrollment_BAO_Enrollment {
   }
 
   /**
-   * TODO: Lookup case_type_id
-   *
    * @return boolean FALSE if the case already exists
    */
   public function safeCreateCase() {
     if (empty($this->case)) {
+      // TODO: it's kind of dumb to look this up for each new case... we should
+      // cache this somewhere...
+      $optionGroup = civicrm_api3('OptionGroup', 'getsingle', array(
+        'name' => 'case_type',
+        'api.OptionValue.getvalue' => array(
+          'option_group_id' => '$value.id',
+          'name' => self::POLICY_CASE_TYPE,
+          'return' => 'value',
+        ),
+      ));
+      $caseTypeId = $optionGroup['api.OptionValue.getvalue'];
+      // end TODO
+
       $result = civicrm_api3('Case', 'create', array(
-        'case_type_id' => $foo,
+        'case_type_id' => $caseTypeId,
         'contact_id' => $this->client_id,
         'start_date' => date('Y-m-d'),
         'subject' => ts('Workplace Policy for %1', array(1 => $this->client_display_name, 'domain' => 'org.drugfreepa.enrollment')),
