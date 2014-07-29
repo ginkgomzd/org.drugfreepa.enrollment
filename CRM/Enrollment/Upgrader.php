@@ -24,7 +24,7 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     $caseTypeLabel = ts('Workplace Policy Enrollment', array('domain' => 'org.drugfreepa.enrollment'));
 
-    self::createCaseType('DFWPSEnrollment', $caseTypeLabel);
+    self::createCaseType(CRM_Enrollment_BAO_Enrollment::POLICY_CASE_TYPE, $caseTypeLabel);
 
   }
 

@@ -6,6 +6,8 @@
  */
 class CRM_Enrollment_BAO_Enrollment {
 
+  const POLICY_CASE_TYPE = 'DFWPSPolicy';
+
   /**
    * Case data as returned by API get
    *
