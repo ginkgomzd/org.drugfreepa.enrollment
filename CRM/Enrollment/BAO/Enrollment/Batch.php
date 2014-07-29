@@ -42,8 +42,9 @@ class CRM_Enrollment_BAO_Enrollment_Batch {
         // types are added to the result
         foreach($api['values'] as $data) {
           if ($data['api.Membership.get']['count']) {
-            $membership_id = $data['api.Membership.get']['values']['id'];
-            $batch->enrollments[$membership_id] = new CRM_Enrollment_BAO_Enrollment($membership_id);
+            $membership = current($data['api.Membership.get']['values']);
+            $membership_id = $membership['id'];
+            $batch->enrollments[$membership_id] = new CRM_Enrollment_BAO_Enrollment($membership_id, $membership);
           }
         }
 
