@@ -6,7 +6,7 @@
  */
 class CRM_Enrollment_BAO_Enrollment {
 
-  const POLICY_CASE_TYPE = 'DFWPSPolicy';
+  const POLICY_CASE_TYPE = 'workplace_policy_enrollment';
 
   /**
    * Membership types whose names match this pattern are considered to be
@@ -111,7 +111,6 @@ class CRM_Enrollment_BAO_Enrollment {
     if (empty($this->case)) {
       $result = civicrm_api3('Case', 'create', array(
         'case_type_id' => self::$policy_case_type_id,
-        'case_type' => self::POLICY_CASE_TYPE,
         'contact_id' => $this->client_id,
         'start_date' => date('Y-m-d'),
         'subject' => ts('Workplace Policy for %1', array(1 => $this->client_display_name, 'domain' => 'org.drugfreepa.enrollment')),

@@ -22,6 +22,8 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     self::createActivityTypes($typesConf);
 
+    // due to quirks in CiviCase, it's best if the name is the lowercased,
+    // underscored version of the label
     $caseTypeLabel = ts('Workplace Policy Enrollment', array('domain' => 'org.drugfreepa.enrollment'));
 
     self::createCaseType(CRM_Enrollment_BAO_Enrollment::POLICY_CASE_TYPE, $caseTypeLabel);
