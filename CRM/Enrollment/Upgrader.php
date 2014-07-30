@@ -40,6 +40,8 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
    */
   public function enable() {
     $this->setComponentStatuses(array('CiviCase' => TRUE));
+
+    $this->createChecklistCustomData();
   }
 
   /**
@@ -51,6 +53,49 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
 
    */
+
+  private function createChecklistCustomData() {
+    $smarty = CRM_Core_Smarty::singleton();
+    $customIDs = self::getCustomDataNextIDs();
+    $smarty->assign('customIDs', $customIDs);
+    self::executeCustomDataTemplateFile('checklist_custom_data.xml.tpl');
+  }
+
+  /**
+   * lookup the AUTO_INCREMENT values for the custom_group and custom_field tables
+   *
+   * return array ( 'civicrm_custom_group' => <ID>, 'civicrm_custom_field' => <ID>)
+   */
+   private static function getCustomDataNextIDs() {
+    $result = array();
+
+    $query = "SELECT `table_name`, `AUTO_INCREMENT` FROM `information_schema`.`TABLES`
+      WHERE `table_schema` = DATABASE()
+      AND `table_name` IN ('civicrm_custom_group', 'civicrm_custom_field')";
+    $dao = CRM_Core_DAO::executeQuery($query);
+    while ($dao->fetch()) {
+      $result[$dao->table_name] = (int) $dao->AUTO_INCREMENT;
+    }
+
+    return $result;
+  }
+  /**
+   * Load Smarty and parse a tpl from the relative path given
+   * requires 'CRM/Utils/Migrate/Import.php'
+   *
+   * @param type $relativePath
+   * @return boolean
+   */
+  public static function executeCustomDataTemplateFile($relativePath) {
+      $smarty = CRM_Core_Smarty::singleton();
+      $xmlCode = $smarty->fetch($relativePath);
+      $xml = simplexml_load_string($xmlCode);
+
+      require_once 'CRM/Utils/Migrate/Import.php';
+      $import = new CRM_Utils_Migrate_Import();
+      $import->runXmlElement($xml);
+      return TRUE;
+  }
 
   /**
    * Creates activity types from a list of name => labels
@@ -101,9 +146,8 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
       'return' => 'value'
     ));
 
-    if ($optionValue['is_error'] == 0) {
-      // already exists, do nothging.
-      return $optionValue['result'];
+    if (is_string($optionValue)) { // already exists, do nothing.
+      return $optionValue;
     }
 
     $params = array(
