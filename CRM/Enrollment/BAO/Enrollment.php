@@ -9,6 +9,12 @@ class CRM_Enrollment_BAO_Enrollment {
   const POLICY_CASE_TYPE = 'DFWPSPolicy';
 
   /**
+   * Membership types whose names match this pattern are considered to be
+   * Enrollment membership types.
+   */
+  const MEMBERSHIP_TYPE_NAME_PATTERN = 'Drug Free Workplace Membership%';
+
+  /**
    * Case data as returned by API get
    *
    * @var array
@@ -43,8 +49,18 @@ class CRM_Enrollment_BAO_Enrollment {
    */
   private $membership = array();
 
+  /**
+   * The ID of the type of case that should be created by $this->safeCreateCase().
+   *
+   * @var int
+   */
+  private static $policy_case_type_id;
 
-  public function __construct($membership_id, $membership = array()) {
+  /**
+   * @param int $membership_id Membership ID for this Enrollment
+   * @param array $membership Membership data as returned by API get
+   */
+  public function __construct($membership_id, array $membership = array()) {
     $this->id = $membership_id;
 
     if (!empty($membership)) {
@@ -57,27 +73,14 @@ class CRM_Enrollment_BAO_Enrollment {
 
     $this->client_id = $this->membership['contact_id'];
 
-    try {
-      $this->client_display_name = civicrm_api3('Contact', 'getvalue', array(
-         'id' => $this->client_id,
-          'return' => 'display_name',
-      ));
-    } catch (Exception $e) {
-      $this->client_display_name = ts('Client %1', array(1 => $this->client_id, 'domain' => 'org.drugfreepa.enrollment'));
-    }
-  }
+    $display_name = civicrm_api3('Contact', 'getvalue', array(
+       'id' => $this->client_id,
+        'return' => 'display_name',
+    ));
 
-  public function __get($name) {
-    return $this->$name;
-  }
+    $this->client_display_name = $display_name ? $display_name : ts('Client %1', array(1 => $this->client_id, 'domain' => 'org.drugfreepa.enrollment'));
 
-  /**
-   * @return boolean FALSE if the case already exists
-   */
-  public function safeCreateCase() {
-    if (empty($this->case)) {
-      // TODO: it's kind of dumb to look this up for each new case... we should
-      // cache this somewhere...
+    if (empty(self::$policy_case_type_id)) {
       $optionGroup = civicrm_api3('OptionGroup', 'getsingle', array(
         'name' => 'case_type',
         'api.OptionValue.getvalue' => array(
@@ -86,11 +89,28 @@ class CRM_Enrollment_BAO_Enrollment {
           'return' => 'value',
         ),
       ));
-      $caseTypeId = $optionGroup['api.OptionValue.getvalue'];
-      // end TODO
+      self::$policy_case_type_id = $optionGroup['api.OptionValue.getvalue'];
+    }
+  }
 
+  public function __get($name) {
+    return $this->$name;
+  }
+
+  /**
+   * Creates a case for the Enrollment, if $this->case isn't already set. The
+   * resulting case is stored in $this->case, formatted as an array as returned
+   * by api.Case.create.
+   *
+   * This method is meant to be called in a batch and serves to decouple the
+   * instantiation of the Enrollment object from the case creation.
+   *
+   * @return boolean FALSE if the case already exists
+   */
+  public function safeCreateCase() {
+    if (empty($this->case)) {
       $result = civicrm_api3('Case', 'create', array(
-        'case_type_id' => $caseTypeId,
+        'case_type_id' => self::$policy_case_type_id,
         'contact_id' => $this->client_id,
         'start_date' => date('Y-m-d'),
         'subject' => ts('Workplace Policy for %1', array(1 => $this->client_display_name, 'domain' => 'org.drugfreepa.enrollment')),
@@ -108,7 +128,7 @@ class CRM_Enrollment_BAO_Enrollment {
    */
   public static function getEnrollmentMembershipTypes() {
     $result = civicrm_api3('MembershipType', 'get', array(
-      'name' => array('LIKE' => 'Drug Free Workplace Membership%'),
+      'name' => array('LIKE' => self::MEMBERSHIP_TYPE_NAME_PATTERN),
     ));
 
     if (!$result['count']) {
