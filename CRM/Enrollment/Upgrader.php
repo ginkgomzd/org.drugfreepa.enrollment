@@ -45,8 +45,8 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     $this->createChecklistCustomData();
 
-    self::createChecklistProfileFields(
-      self::createChecklistProfile()
+    CRM_Utils_Ext_CustomData::profileAddCustomGroupFields(
+      self::createChecklistProfile(), self::SURVEY_CUSTOM_GROUP_NAME
     );
   }
 
@@ -62,30 +62,11 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
   private function createChecklistCustomData() {
     $smarty = CRM_Core_Smarty::singleton();
-    $customIDs = self::getCustomDataNextIDs();
+    $customIDs = CRM_Utils_Ext_CustomData::getCustomDataNextIDs();
     $smarty->assign('customIDs', $customIDs);
     $smarty->assign('customGroupName', self::SURVEY_CUSTOM_GROUP_NAME);
 
-    self::executeCustomDataTemplateFile('checklist_custom_data.xml.tpl');
-  }
-
-  /**
-   * lookup the AUTO_INCREMENT values for the custom_group and custom_field tables
-   *
-   * return array ( 'civicrm_custom_group' => <ID>, 'civicrm_custom_field' => <ID>)
-   */
-   private static function getCustomDataNextIDs() {
-    $result = array();
-
-    $query = "SELECT `table_name`, `AUTO_INCREMENT` FROM `information_schema`.`TABLES`
-      WHERE `table_schema` = DATABASE()
-      AND `table_name` IN ('civicrm_custom_group', 'civicrm_custom_field')";
-    $dao = CRM_Core_DAO::executeQuery($query);
-    while ($dao->fetch()) {
-      $result[$dao->table_name] = (int) $dao->AUTO_INCREMENT;
-    }
-
-    return $result;
+    CRM_Utils_Ext_CustomData::executeCustomDataTemplateFile('checklist_custom_data.xml.tpl');
   }
 
   private static function createChecklistProfile() {
@@ -109,81 +90,6 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
     return $profile_id;
   }
 
-  private static function createChecklistProfileFields($uf_group_id) {
-//    $params[] = array(
-//      'version' => 3,
-//      'sequential' => 1,
-//      'uf_group_id' => $uf_group_id,
-//      'field_name' => 'last_name',
-//      'label' => 'Last Name',
-//    );
-//    $params[] = array(
-//      'version' => 3,
-//      'sequential' => 1,
-//      'uf_group_id' => $uf_group_id,
-//      'field_name' => 'first_name',
-//      'label' => 'First Name',
-//    );
-//    $field_column = civicrm_api3('CustomField', 'getvalue',
-//      array('version' => 3, 'name' => 'interests',
-//        'return' => 'column_name')
-//    );
-//
-    $group_table = civicrm_api3('CustomGroup', 'getvalue',
-      array('version' => 3, 'name' => self::SURVEY_CUSTOM_GROUP_NAME,
-        'return' => 'table_name')
-    );
-//    $params[] = array(
-//      'version' => 3,
-//      'sequential' => 1,
-//      'uf_group_id' => $uf_group_id,
-//      'field_name' => 'custom.'.$group_table.'.'.$field_column,
-//      'label' => 'What are your interests?',
-//    );
-
-    $params = array(
-      'version' => 3,
-      'page' => 'CiviCRM',
-      'q' => 'civicrm/ajax/rest',
-      'sequential' => 1,
-      'custom_group_id' => 4, //TODO: lookup using self::SURVEY_CUSTOM_GROUP_NAME
-    );
-    $apiResult = civicrm_api('CustomField', 'get', $params);
-
-    $params = array();
-    foreach ($apiResult['values'] as $field_def) {
-      $params[] = array(
-        'version' => 3,
-        'uf_group_id' => $uf_group_id,
-        'field_name' => 'custom_'.$field_def['id'],
-        'label' => $field_def['label'],
-      );
-    }
-
-    foreach ($params as $field) {
-      $result = civicrm_api('UFField', 'create', $field);
-      CRM_Core_Session::setStatus(var_export($result, TRUE), 'result', 'error');
-    }
-  }
-
-  /**
-   * Load Smarty and parse a tpl from the relative path given
-   * requires 'CRM/Utils/Migrate/Import.php'
-   *
-   * @param type $relativePath
-   * @return boolean
-   */
-  public static function executeCustomDataTemplateFile($relativePath) {
-      $smarty = CRM_Core_Smarty::singleton();
-      $xmlCode = $smarty->fetch($relativePath);
-      $xml = simplexml_load_string($xmlCode);
-
-      require_once 'CRM/Utils/Migrate/Import.php';
-      $import = new CRM_Utils_Migrate_Import();
-      $import->runXmlElement($xml);
-      return TRUE;
-  }
-
   /**
    * Creates activity types from a list of name => labels
    *
@@ -199,65 +105,10 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     $activityTypeIDs = array();
     foreach ($typesConf as $activity => $label) {
-      $activityTypeIDs[] = self::safeCreateOptionValue($optionGroup, $activity, $label);
+      $activityTypeIDs[] = CRM_Utils_Ext_CustomData::safeCreateOptionValue($optionGroup, $activity, $label);
     }
 
     return $activityTypeIDs;
-  }
-
-  /**
-   * Create new Option Value with a check based on name.
-   * Returns the activity type ID
-   *
-   * @param array/int $optionGroup result of api OptionGroup Get, OR int Group ID
-   * @param string $optionName
-   * @param string $optionLabel
-   * @param string $newValue Optional
-   *
-   * @return int $value
-   *
-   * @throws API_Exception
-   */
-  public static function safeCreateOptionValue($optionGroup, $optionName, $optionLabel, $newValue = null) {
-
-    if (is_numeric($optionGroup)) {
-      $group_id = $optionGroup;
-    } else {
-      $group_id = $optionGroup['id'];
-    }
-
-    $optionValue = civicrm_api('OptionValue', 'GetValue', array(
-      'version' => 3,
-      'name' => $optionName,
-      'option_group_id' => $group_id,
-      'return' => 'value'
-    ));
-
-    if (is_string($optionValue)) { // already exists, do nothing.
-      return $optionValue;
-    }
-
-    $params = array(
-      'version' => 3,
-      'name' => $optionName,
-      'label' => $optionLabel,
-      'option_group_id' => $group_id,
-    );
-
-    if(!is_null($newValue)) {
-      $params['value'] = $newValue;
-    }
-
-    try {
-      $result = civicrm_api3('OptionValue', 'create', $params);
-    } catch (CiviCRM_API3_Exception $x) {
-      throw new API_Exception(
-        'Exception in safeCreateOptionValue. API3_Exception: '.$x->getMessage()
-        , $x->getErrorCode(), $x->getExtraParams(), $x
-        );
-    }
-
-    return $result['values'][$result['id']]['value'];
   }
 
   /**
@@ -274,7 +125,7 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
       'return' => 'id'
     ));
 
-    return self::safeCreateOptionValue($optionGroup, $typeName, $typeLabel);
+    return CRM_Utils_Ext_CustomData::safeCreateOptionValue($optionGroup, $typeName, $typeLabel);
   }
 
   /**
