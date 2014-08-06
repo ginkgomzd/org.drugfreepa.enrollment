@@ -8,6 +8,8 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
   // By convention, functions that look like "function upgrade_NNNN()" are
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
 
+  const SURVEY_CUSTOM_GROUP_NAME = 'Survey_Questions';
+
   /**
    *
    */
@@ -42,6 +44,10 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
     $this->setComponentStatuses(array('CiviCase' => TRUE));
 
     $this->createChecklistCustomData();
+
+    self::createChecklistProfileFields(
+      self::createChecklistProfile()
+    );
   }
 
   /**
@@ -58,6 +64,8 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
     $smarty = CRM_Core_Smarty::singleton();
     $customIDs = self::getCustomDataNextIDs();
     $smarty->assign('customIDs', $customIDs);
+    $smarty->assign('customGroupName', self::SURVEY_CUSTOM_GROUP_NAME);
+
     self::executeCustomDataTemplateFile('checklist_custom_data.xml.tpl');
   }
 
@@ -79,6 +87,85 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     return $result;
   }
+
+  private static function createChecklistProfile() {
+    $params = array(
+      'version' => 3,
+      'sequential' => 1,
+      'group_type' => 'Activity',
+      'title' => ts('Policy Checklist', 'org.drugfreepa.enrollment'),
+      'is_update_dupe' => 1,
+      'is_cms_user' => 0, //CHANGE ME?
+      'is_reserved' => 0,
+    );
+    $api_result = civicrm_api('UFGroup', 'create', $params);
+
+    if ($api_result['is_error'] == 1) {
+      $profile_id = null;
+    } else {
+      $profile_id = $api_result['id'];
+    }
+
+    return $profile_id;
+  }
+
+  private static function createChecklistProfileFields($uf_group_id) {
+//    $params[] = array(
+//      'version' => 3,
+//      'sequential' => 1,
+//      'uf_group_id' => $uf_group_id,
+//      'field_name' => 'last_name',
+//      'label' => 'Last Name',
+//    );
+//    $params[] = array(
+//      'version' => 3,
+//      'sequential' => 1,
+//      'uf_group_id' => $uf_group_id,
+//      'field_name' => 'first_name',
+//      'label' => 'First Name',
+//    );
+//    $field_column = civicrm_api3('CustomField', 'getvalue',
+//      array('version' => 3, 'name' => 'interests',
+//        'return' => 'column_name')
+//    );
+//
+    $group_table = civicrm_api3('CustomGroup', 'getvalue',
+      array('version' => 3, 'name' => self::SURVEY_CUSTOM_GROUP_NAME,
+        'return' => 'table_name')
+    );
+//    $params[] = array(
+//      'version' => 3,
+//      'sequential' => 1,
+//      'uf_group_id' => $uf_group_id,
+//      'field_name' => 'custom.'.$group_table.'.'.$field_column,
+//      'label' => 'What are your interests?',
+//    );
+
+    $params = array(
+      'version' => 3,
+      'page' => 'CiviCRM',
+      'q' => 'civicrm/ajax/rest',
+      'sequential' => 1,
+      'custom_group_id' => 4, //TODO: lookup using self::SURVEY_CUSTOM_GROUP_NAME
+    );
+    $apiResult = civicrm_api('CustomField', 'get', $params);
+
+    $params = array();
+    foreach ($apiResult['values'] as $field_def) {
+      $params[] = array(
+        'version' => 3,
+        'uf_group_id' => $uf_group_id,
+        'field_name' => 'custom_'.$field_def['id'],
+        'label' => $field_def['label'],
+      );
+    }
+
+    foreach ($params as $field) {
+      $result = civicrm_api('UFField', 'create', $field);
+      CRM_Core_Session::setStatus(var_export($result, TRUE), 'result', 'error');
+    }
+  }
+
   /**
    * Load Smarty and parse a tpl from the relative path given
    * requires 'CRM/Utils/Migrate/Import.php'

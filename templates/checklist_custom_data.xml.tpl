@@ -3,7 +3,7 @@
 <CustomData>
   <CustomGroups>
     <CustomGroup>
-      <name>Survey_Questions</name>
+      <name>{$customGroupName}</name>
       <title>Survey Questions</title>
       <extends>Activity</extends>
       <extends_entity_column_value_option_group>activity_type</extends_entity_column_value_option_group>
