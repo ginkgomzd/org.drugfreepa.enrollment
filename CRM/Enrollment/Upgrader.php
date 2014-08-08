@@ -28,6 +28,11 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     self::createCaseType(CRM_Enrollment_BAO_Enrollment::POLICY_CASE_TYPE, $caseTypeLabel);
 
+    CRM_Listener_Registry::addListener(
+      'CRM_Enrollment_Listener_Event_CaseActivityCompleted',
+      'CRM_Enrollment_Listener_Listener_UpdateWorkflowDueDates',
+      'org.drugfreepa.enrollment'
+    );
   }
 
   /**
