@@ -20,10 +20,7 @@ function enrollment_civicrm_post($op, $objectName, $objectId, &$objectRef) {
  * types; we can't do that check here because the MembershipPayment record hasn't
  * been created yet.
  *
- * @param type $op
- * @param type $objectName
- * @param type $objectId
- * @param type $objectRef
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
  */
 function _enrollment_civicrm_post_Contribution($op, $objectName, $objectId, &$objectRef) {
 
@@ -48,4 +45,14 @@ function _enrollment_civicrm_post_Contribution($op, $objectName, $objectId, &$ob
     );
     $queueManager->createItem($data);
   }
+}
+
+/**
+ * Delegated implementation of hook_civicrm_post for Activity objects
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
+ */
+function _enrollment_civicrm_post_Activity($op, $objectName, $objectId, &$activity) {
+  $event = new CRM_Enrollment_Listener_Event_CaseActivityCompleted($activity);
+  $event->raiseCondtionally();
 }

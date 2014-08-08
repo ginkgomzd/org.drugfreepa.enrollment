@@ -28,6 +28,11 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     self::createCaseType(CRM_Enrollment_BAO_Enrollment::POLICY_CASE_TYPE, $caseTypeLabel);
 
+    CRM_Listener_Registry::addListener(
+      'CRM_Enrollment_Listener_Event_CaseActivityCompleted',
+      'CRM_Enrollment_Listener_Listener_UpdateWorkflowDueDates',
+      'org.drugfreepa.enrollment'
+    );
   }
 
   /**
@@ -103,8 +108,8 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
       'return' => 'value'
     ));
 
-    if ($optionValue['is_error'] == 0) {
-      // already exists, do nothging.
+    if (CRM_Utils_Array::value('is_error', $optionValue) === NULL) {
+      // already exists, do nothing.
       return $optionValue['result'];
     }
 
