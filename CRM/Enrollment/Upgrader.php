@@ -103,8 +103,8 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
       'return' => 'value'
     ));
 
-    if ($optionValue['is_error'] == 0) {
-      // already exists, do nothging.
+    if (CRM_Utils_Array::value('is_error', $optionValue) === NULL) {
+      // already exists, do nothing.
       return $optionValue['result'];
     }
 
