@@ -8,7 +8,103 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
   // By convention, functions that look like "function upgrade_NNNN()" are
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
 
-  const SURVEY_CUSTOM_GROUP_NAME = 'Survey_Questions';
+  private $_customGroupProperties;
+  private $_customGroupNames;
+
+  /**
+   * Get or declare psuedo-constants for Custom Group machine names
+   *
+   * @return string
+   */
+  public function getCustomGroupNames() {
+    if (!is_null($this->_customGroupNames)) {
+      return $this->_customGroupNames;
+    }
+
+    $this->_customGroupNames = array(
+      'REASON_FOR_POLICY' => 'reason_for_policy',
+      'WHO_COVERED' => 'who_covered',
+      'WHEN_APPLY' => 'when_apply',
+      'EMPLOYEE_TESTING' => 'employee_testing',
+      'TEST_PROTOCOL' => 'test_protocol',
+      'DISCIPLINARY_ACT' => 'disciplinary_action',
+      'EMP_RESOURCES' => 'employee_resources',
+      'PARTICIPATION' => 'participation',
+      'WORK_ASSESSMENT' => 'workplace_assessment',
+    );
+
+    return $this->_customGroupNames;
+  }
+
+  /**
+   * Get array of custom groups to create
+   * 'name' => 'title'
+   *
+   * @return array
+   */
+  public function getCustomGroupProperties() {
+    if (isset($this->_customGroupProperties)) {
+      return $this->_customGroupProperties;
+    }
+    $names = $this->getCustomGroupNames();
+
+    $this->_customGroupProperties = array(
+      $names['REASON_FOR_POLICY'] => array(
+        'title'     => 'Reason for Policy',
+        'pre_help'  => '',
+      ),
+      $names['WHO_COVERED'] => array(
+        'title' => 'Who will be covered?',
+        'pre_help' => '',
+      ),
+      $names['WHEN_APPLY'] => array(
+        'title' => 'When will the Policy apply?',
+        'pre_help' => '',
+      ),
+      $names['EMPLOYEE_TESTING'] => array(
+        'title' => 'Testing of Applicants or Employees',
+        'pre_help' => '',
+      ),
+      $names['TEST_PROTOCOL'] => array(
+        'title' => 'Testing Protocols',
+        'pre_help' => '',
+      ),
+      $names['DISCIPLINARY_ACT'] => array(
+        'title' => 'Disciplinary Actions',
+        'pre_help' => 'Disciplinary action to be imposed for violations.',
+      ),
+      $names['EMP_RESOURCES'] => array(
+        'title' => 'Additional Resources for Employees',
+        'pre_help' => '',
+      ),
+      $names['PARTICIPATION'] => array(
+        'title' => 'Reason for Participating',
+        'pre_help' => 'Please indicate your company\'s reason for participating in the drug-Free WorkPlace Solutions Program.',
+      ),
+      $names['WORK_ASSESSMENT'] => array(
+        'title' => 'Workplace Characteristics',
+        'pre_help' => 'Please note how strongly you agree or disagree with each statement about your workplace',
+      ),
+    );
+
+    return $this->_customGroupProperties;
+  }
+
+  /**
+   * Generate table names of the form, 'civicrm_value_<name>_<id>'
+   * and assign to the table_name key of each group array.
+   *
+   * @param array $arrCustomGroups of group properties arrays indexed by name
+   */
+  public static function createCustomGroupTableNames(&$arrCustomGroups) {
+    $customIDs = CRM_Utils_Ext_CustomData::getCustomDataNextIDs();
+    $id = $customIDs['civicrm_custom_group'];
+    
+    foreach ($arrCustomGroups as $name => $group) {
+       $group['table_name'] = "civicrm_value_{$name}_{$id}";
+      $id = $id++;
+    }
+  }
 
   /**
    *
@@ -45,9 +141,12 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     $this->createChecklistCustomData();
 
-    CRM_Utils_Ext_CustomData::profileAddCustomGroupFields(
-      self::createChecklistProfile(), self::SURVEY_CUSTOM_GROUP_NAME
-    );
+    $profile_id = self::createChecklistProfile();
+    foreach (array_keys(self::getCustomGroupProperties()) as $name) {
+      CRM_Utils_Ext_CustomData::profileAddCustomGroupFields(
+       $profile_id , $name
+      );
+    }
   }
 
   /**
@@ -64,8 +163,9 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
     $smarty = CRM_Core_Smarty::singleton();
     $customIDs = CRM_Utils_Ext_CustomData::getCustomDataNextIDs();
     $smarty->assign('customIDs', $customIDs);
-    $smarty->assign('customGroupName', self::SURVEY_CUSTOM_GROUP_NAME);
-
+    $smarty->assign('customGroups', $this->getCustomGroupProperties());
+    $smarty->assign('customGroupNames', $this->getCustomGroupNames());
+    
     CRM_Utils_Ext_CustomData::executeCustomDataTemplateFile('checklist_custom_data.xml.tpl');
   }
 

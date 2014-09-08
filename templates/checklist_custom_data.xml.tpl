@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="iso-8859-1" ?>
-{assign var=custom_id_counter value=$customIDs.civicrm_custom_field}
 <CustomData>
   <CustomGroups>
+  {foreach from=$customGroups key=name item=group}
     <CustomGroup>
-      <name>{$customGroupName}</name>
-      <title>Survey Questions</title>
+      <name>{$name}</name>
+      <title>{$group.title}</title>
       <extends>Activity</extends>
       <extends_entity_column_value_option_group>activity_type</extends_entity_column_value_option_group>
-      <extends_entity_column_value>Survey</extends_entity_column_value>
+      <extends_entity_column_value>Checklist</extends_entity_column_value>
       <style>Inline</style>
       <collapse_display>0</collapse_display>
-      <help_pre></help_pre>
+      <help_pre>{$group.pre_help}</help_pre>
       <help_post></help_post>
       <weight>1</weight>
       <is_active>1</is_active>
-      <table_name>civicrm_value_survey_questions_{$customIDs.civicrm_custom_group}</table_name>
+      <table_name>{$group.table_name}</table_name>
       <is_multiple>0</is_multiple>
       <collapse_adv_display>0</collapse_adv_display>
       <is_reserved>0</is_reserved>
     </CustomGroup>
+  {/foreach}
   </CustomGroups>
   <CustomFields>
     <CustomField>
@@ -36,8 +37,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>are_you_dot_regulated_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>are_you_dot_regulated_{counter start=$customIDs.civicrm_custom_field}</column_name>
+      <custom_group_name>{$customGroupNames.REASON_FOR_POLICY}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>If_you_are_DOT_regulated_which_agency_are_you_regulated_bu_</name>
@@ -53,13 +54,13 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>if_you_are_dot_regulated_which_a_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>if_you_are_dot_regulated_which_a_{counter}</column_name>
       <option_group_name>if_you_are_dot_regulated_which_a_20140728212243</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.REASON_FOR_POLICY}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_have_any_contracts_over_100_000_</name>
-      <label>Do you have any contracts over $100,000?</label>
+      <label>Do you have any federal contracts over $100,000?</label>
       <data_type>Boolean</data_type>
       <html_type>Radio</html_type>
       <is_required>0</is_required>
@@ -71,8 +72,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_have_any_contracts_over_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>do_you_have_any_contracts_over_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.REASON_FOR_POLICY}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_receive_any_federal_grants_of_any_amount_</name>
@@ -88,12 +89,12 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_receive_any_federal_grant_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>do_you_receive_any_federal_grant_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.REASON_FOR_POLICY}</custom_group_name>
     </CustomField>
     <CustomField>
-      <name>Are_you_insured_with_the_STate_Workers_INsurance_Fund_SWIF_for_w</name>
-      <label>Are you insured with the STate Workers' INsurance Fund (SWIF) for worker's compensation?</label>
+      <name>Are_you_insured_with_SWIF</name>
+      <label>Are you insured with the State Workers' Insurance Fund (SWIF) for worker's compensation?</label>
       <data_type>Boolean</data_type>
       <html_type>Radio</html_type>
       <is_required>0</is_required>
@@ -105,8 +106,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>are_you_insured_with_the_state_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>are_you_insured_with_swif_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.REASON_FOR_POLICY}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Is_your_SWIF_workers_compensation_annual_policy_premium_greater_</name>
@@ -122,8 +123,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>is_your_swif_workers_compensatio_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>is_your_swif_workers_compensatio_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.REASON_FOR_POLICY}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>When_is_the_date_of_your_SWIF_policy_renewal_</name>
@@ -141,8 +142,8 @@
       <date_format>mm/dd/yy</date_format>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>when_is_the_date_of_your_swif_po_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>when_is_the_date_of_your_swif_po_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.REASON_FOR_POLICY}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_employ_unionized_employees_</name>
@@ -158,13 +159,13 @@
       <text_length>3</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_employ_unionized_employee_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>do_you_employ_unionized_employee_{counter}</column_name>
       <option_group_name>do_you_employ_unionized_employee_20140728212833</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.WHO_COVERED}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>If_you_employ_unionized_employees_do_you_have_the_authority_to_c</name>
-      <label>If you employ unionized employees, do you have the authority to create a drug-fre workplace policy?</label>
+      <label>If you employ unionized employees, do you have the authority to create a drug-free workplace policy?</label>
       <data_type>String</data_type>
       <html_type>Radio</html_type>
       <is_required>0</is_required>
@@ -176,9 +177,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>if_you_employ_unionized_employee_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>if_you_employ_unionized_employee_{counter}</column_name>
       <option_group_name>do_you_employ_unionized_employee_20140728212833</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.WHO_COVERED}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_employ_temprary_employees_</name>
@@ -194,9 +195,9 @@
       <text_length>3</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_employ_temprary_employees_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>do_you_employ_temprary_employees_{counter}</column_name>
       <option_group_name>do_you_employ_unionized_employee_20140728212833</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.WHO_COVERED}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_any_of_your_employees_serve_alcohol_within_the_course_of_thei</name>
@@ -212,9 +213,9 @@
       <text_length>3</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_any_of_your_employees_serve_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>do_any_of_your_employees_serve_{counter}</column_name>
       <option_group_name>do_you_employ_unionized_employee_20140728212833</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.WHO_COVERED}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_use_contractors_subcontractors_</name>
@@ -231,9 +232,9 @@
       <text_length>3</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_use_contractors_subcontra_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>do_you_use_contractors_subcontra_{counter}</column_name>
       <option_group_name>do_you_employ_unionized_employee_20140728212833</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.WHO_COVERED}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Will_the_policy_apply_during_all_working_hours_</name>
@@ -249,13 +250,13 @@
       <text_length>3</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>will_the_policy_apply_during_all_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>will_the_policy_apply_during_all_{counter}</column_name>
       <option_group_name>do_you_employ_unionized_employee_20140728212833</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.WHEN_APPLY}</custom_group_name>
     </CustomField>
     <CustomField>
-      <name>Will_this_policy_apply_whenever_conductin_business_or_representi</name>
-      <label>Will this policy apply whenever conductin business or representing theorganizaion?</label>
+      <name>Will_this_policy_apply_whenever_conducting_business_or_represent</name>
+      <label>Will this policy apply whenever conducting business or representing the organizaion?</label>
       <data_type>String</data_type>
       <html_type>Radio</html_type>
       <is_required>0</is_required>
@@ -267,9 +268,9 @@
       <text_length>3</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>will_this_policy_apply_whenever_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>will_this_policy_apply_whenever_{counter}</column_name>
       <option_group_name>do_you_employ_unionized_employee_20140728212833</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.WHEN_APPLY}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Will_this_policy_apply_while_on_call_paid_standby_</name>
@@ -285,9 +286,9 @@
       <text_length>3</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>will_this_policy_apply_while_on_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>will_this_policy_apply_while_on_{counter}</column_name>
       <option_group_name>do_you_employ_unionized_employee_20140728212833</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.WHEN_APPLY}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Will_this_policy_apply_at_company_sponsored_events_such_as_parti</name>
@@ -303,9 +304,9 @@
       <text_length>3</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>will_this_policy_apply_at_compan_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>will_this_policy_apply_at_compan_{counter}</column_name>
       <option_group_name>do_you_employ_unionized_employee_20140728212833</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.WHEN_APPLY}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_want_to_conduct_drug_testing_of_employees_in_the_followin</name>
@@ -321,13 +322,13 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_want_to_conduct_drug_test_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>do_you_want_to_conduct_drug_test_{counter}</column_name>
       <option_group_name>do_you_want_to_conduct_drug_test_20140728213903</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.EMPLOYEE_TESTING}</custom_group_name>
     </CustomField>
     <CustomField>
-      <name>Do_you_want_to_conduct_alchool_testing_of_eployees_in_the_follow</name>
-      <label>Do you want to conduct alchool testing of eployees in the following circumstances?</label>
+      <name>Do_you_want_to_conduct_alcohol_testing_of_eployees_in_the_follow</name>
+      <label>Do you want to conduct alcohol testing of eployees in the following circumstances?</label>
       <data_type>String</data_type>
       <html_type>CheckBox</html_type>
       <is_required>0</is_required>
@@ -339,13 +340,13 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_want_to_conduct_alchool_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>do_you_want_to_conduct_alcohol_{counter}</column_name>
       <option_group_name>do_you_want_to_conduct_alchool_t_20140728214057</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.EMPLOYEE_TESTING}</custom_group_name>
     </CustomField>
     <CustomField>
-      <name>Do_you_want_to_offer_an_employee_who_tests_positiity_to_have_the</name>
-      <label>Do you want to offer an employee who tests positiity to have the original specimen tested at a different laboratory (submitted for a verificationtest)?ve another opportun</label>
+      <name>Do_you_want_to_offer_an_employee_who_tests_positive</name>
+      <label>Do you want to offer an employee who tests positive another opportunity to have the original specimen tested at a different laboratory (submitted for a verificationtest)?</label>
       <data_type>Boolean</data_type>
       <html_type>Radio</html_type>
       <is_required>0</is_required>
@@ -357,8 +358,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_want_to_offer_an_employee_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>do_you_want_to_offer_an_employee_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.EMPLOYEE_TESTING}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>If_yes_please_indicate_who_will_pay_for_the_verification_test_</name>
@@ -374,9 +375,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>if_yes_please_indicate_who_will_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>if_yes_please_indicate_who_will_{counter}</column_name>
       <option_group_name>if_yes_please_indicate_who_will__20140728214433</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.EMPLOYEE_TESTING}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Indicate_what_panel_you_want_your_employees_to_be_tested_for</name>
@@ -392,9 +393,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>indicate_what_panel_you_want_you_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>indicate_what_panel_you_want_you_{counter}</column_name>
       <option_group_name>indicate_what_panel_you_want_you_20140728214626</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.TEST_PROTOCOL}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_have_a_preferred_collection_site_</name>
@@ -411,8 +412,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_have_a_preferred_collecti_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>do_you_have_a_preferred_collecti_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.TEST_PROTOCOL}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_have_a_need_for_multiple_collection_sites_</name>
@@ -428,8 +429,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_have_a_need_for_multiple_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>do_you_have_a_need_for_multiple_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.TEST_PROTOCOL}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>If_an_employee_violates_the_policy_will_you_immediately_terminat</name>
@@ -445,8 +446,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>if_an_employee_violates_the_poli_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>if_an_employee_violates_the_poli_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.DISCIPLINARY_ACT}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>If_an_employee_violated_the_policy_will_you_offer_progressive_di</name>
@@ -462,8 +463,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>if_an_employee_violated_the_poli_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>if_an_employee_violated_the_poli_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.DISCIPLINARY_ACT}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>If_so_specify_the_progression_</name>
@@ -480,9 +481,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>if_so_specify_the_progression_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>if_so_specify_the_progression_{counter}</column_name>
       <option_group_name>if_so_specify_the_progression__20140728215134</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.DISCIPLINARY_ACT}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Second_Offense</name>
@@ -498,9 +499,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>second_offense_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>second_offense_{counter}</column_name>
       <option_group_name>if_so_specify_the_progression__20140728215134</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.EMPLOYEE_TESTING}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>I_fan_employee_violates_the_policy_will_you_require_the_employee</name>
@@ -516,8 +517,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>i_fan_employee_violates_the_poli_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>i_fan_employee_violates_the_poli_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.DISCIPLINARY_ACT}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Will_you_want_to_inform_law_engorcement_in_the_event_of_serious_</name>
@@ -533,8 +534,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>will_you_want_to_inform_law_engo_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>will_you_want_to_inform_law_engo_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.DISCIPLINARY_ACT}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_want_to_conduct_personal_property_searches_if_you_believe</name>
@@ -550,8 +551,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_want_to_conduct_personal_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>do_you_want_to_conduct_personal_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.DISCIPLINARY_ACT}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Do_you_have_a_FORMAL_contract_with_an_Emplyee_Assistance_Provide</name>
@@ -567,8 +568,25 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>do_you_have_a_formal_contract_wi_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>do_you_have_a_formal_contract_wi_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.EMP_RESOURCES}</custom_group_name>
+    </CustomField>
+    <CustomField>
+      <name>would_you_like_information_on_our_eap_service</name>
+      <label>Would you like information on our EAP service?</label>
+      <data_type>Boolean</data_type>
+      <html_type>Radio</html_type>
+      <is_required>0</is_required>
+      <is_searchable>0</is_searchable>
+      <is_search_range>0</is_search_range>
+      <weight>31</weight>
+      <is_active>1</is_active>
+      <is_view>0</is_view>
+      <text_length>255</text_length>
+      <note_columns>60</note_columns>
+      <note_rows>4</note_rows>
+      <column_name>would_you_like_information_on_ou_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.EMP_RESOURCES}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Would_you_like_us_to_assist_you_with_training_supervisors_and_or</name>
@@ -584,8 +602,8 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>would_you_like_us_to_assist_you_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>would_you_like_us_to_assist_you_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.EMP_RESOURCES}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Please_indicate_your_company_s_reason_for_participating_in_the_D</name>
@@ -602,13 +620,13 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>please_indicate_your_company_s_r_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>please_indicate_your_company_s_r_{counter}</column_name>
       <option_group_name>please_indicate_your_company_s_r_20140728220538</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Please_note_how_strongly_you_agree_or_disagree_with_each_stateme</name>
-      <label>Please note how strongly you agree or disagree with each statement about your workplace</label>
+      <label>Please note how strongly you agree or disagree with each statement about your workplace.</label>
       <data_type>String</data_type>
       <html_type>Text</html_type>
       <is_required>0</is_required>
@@ -620,8 +638,8 @@
       <text_length>0</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>please_note_how_strongly_you_agr_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <column_name>please_note_how_strongly_you_agr_{counter}</column_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Absenteeism_among_employees_is_a_problem</name>
@@ -637,9 +655,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>absenteeism_among_employees_is_a_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>absenteeism_among_employees_is_a_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Alcohol_or_drug_related_incidents_are_a_problem</name>
@@ -655,9 +673,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>alcohol_or_drug_related_incident_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>alcohol_or_drug_related_incident_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Tardiness_among_employees_is_a_problem</name>
@@ -673,9 +691,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>tardiness_among_employees_is_a_p_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>tardiness_among_employees_is_a_p_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Employee_retention_is_a_problem</name>
@@ -691,9 +709,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>employee_retention_is_a_problem_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>employee_retention_is_a_problem_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Employee_morale_is_a_problem</name>
@@ -709,9 +727,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>employee_morale_is_a_problem_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>employee_morale_is_a_problem_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Workers_compensation_claims_are_a_problem</name>
@@ -727,9 +745,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>workers_compensation_claims_are_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>workers_compensation_claims_are_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Productivity_is_a_problem</name>
@@ -745,9 +763,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>productivity_is_a_problem_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>productivity_is_a_problem_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Accidents_in_the_workplace_are_a_problem</name>
@@ -763,9 +781,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>accidents_in_the_workplace_are_a_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>accidents_in_the_workplace_are_a_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Days_lost_due_to_injury_are_a_problem</name>
@@ -781,9 +799,9 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>days_lost_due_to_injury_are_a_pr_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>days_lost_due_to_injury_are_a_pr_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
     <CustomField>
       <name>Theft_within_the_company_is_a_problem</name>
@@ -799,15 +817,15 @@
       <text_length>255</text_length>
       <note_columns>60</note_columns>
       <note_rows>4</note_rows>
-      <column_name>theft_within_the_company_is_a_pr_{$custom_id_counter}{assign var=custom_id_counter value=$custom_id_counter+1}</column_name>
+      <column_name>theft_within_the_company_is_a_pr_{counter}</column_name>
       <option_group_name>Penta-Scale Agreement</option_group_name>
-      <custom_group_name>Survey_Questions</custom_group_name>
+      <custom_group_name>{$customGroupNames.PARTICIPATION}</custom_group_name>
     </CustomField>
   </CustomFields>
   <OptionGroups>
     <OptionGroup>
       <name>if_you_are_dot_regulated_which_a_20140728212243</name>
-      <title>If you are DOT-regulated, which agency are you regulated bu?</title>
+      <title>If you are DOT-regulated, which agency are you regulated by?</title>
       <is_reserved>1</is_reserved>
       <is_active>1</is_active>
     </OptionGroup>
@@ -1292,9 +1310,9 @@
       <option_group_name>please_indicate_your_company_s_r_20140728220538</option_group_name>
     </OptionValue>
     <OptionValue>
-      <label>To be in compliance with fedral governemnt requirements</label>
+      <label>To be in compliance with federal governemnt requirements</label>
       <value>compliance</value>
-      <name>To_be_in_compliance_with_fedral</name>
+      <name>To_be_in_compliance_with_federal</name>
       <is_default>0</is_default>
       <weight>4</weight>
       <is_optgroup>0</is_optgroup>
