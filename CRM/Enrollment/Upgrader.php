@@ -8,6 +8,104 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
   // By convention, functions that look like "function upgrade_NNNN()" are
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
 
+  private $_customGroupProperties;
+  private $_customGroupNames;
+
+  /**
+   * Get or declare psuedo-constants for Custom Group machine names
+   *
+   * @return string
+   */
+  public function getCustomGroupNames() {
+    if (!is_null($this->_customGroupNames)) {
+      return $this->_customGroupNames;
+    }
+
+    $this->_customGroupNames = array(
+      'REASON_FOR_POLICY' => 'reason_for_policy',
+      'WHO_COVERED' => 'who_covered',
+      'WHEN_APPLY' => 'when_apply',
+      'EMPLOYEE_TESTING' => 'employee_testing',
+      'TEST_PROTOCOL' => 'test_protocol',
+      'DISCIPLINARY_ACT' => 'disciplinary_action',
+      'EMP_RESOURCES' => 'employee_resources',
+      'PARTICIPATION' => 'participation',
+      'WORK_ASSESSMENT' => 'workplace_assessment',
+    );
+
+    return $this->_customGroupNames;
+  }
+
+  /**
+   * Get array of custom groups to create
+   * 'name' => 'title'
+   *
+   * @return array
+   */
+  public function getCustomGroupProperties() {
+    if (isset($this->_customGroupProperties)) {
+      return $this->_customGroupProperties;
+    }
+    $names = $this->getCustomGroupNames();
+
+    $this->_customGroupProperties = array(
+      $names['REASON_FOR_POLICY'] => array(
+        'title'     => 'Reason for Policy',
+        'pre_help'  => '',
+      ),
+      $names['WHO_COVERED'] => array(
+        'title' => 'Who will be covered?',
+        'pre_help' => '',
+      ),
+      $names['WHEN_APPLY'] => array(
+        'title' => 'When will the Policy apply?',
+        'pre_help' => '',
+      ),
+      $names['EMPLOYEE_TESTING'] => array(
+        'title' => 'Testing of Applicants or Employees',
+        'pre_help' => '',
+      ),
+      $names['TEST_PROTOCOL'] => array(
+        'title' => 'Testing Protocols',
+        'pre_help' => '',
+      ),
+      $names['DISCIPLINARY_ACT'] => array(
+        'title' => 'Disciplinary Actions',
+        'pre_help' => 'Disciplinary action to be imposed for violations.',
+      ),
+      $names['EMP_RESOURCES'] => array(
+        'title' => 'Additional Resources for Employees',
+        'pre_help' => '',
+      ),
+      $names['PARTICIPATION'] => array(
+        'title' => 'Reason for Participating',
+        'pre_help' => 'Please indicate your company\'s reason for participating in the drug-Free WorkPlace Solutions Program.',
+      ),
+      $names['WORK_ASSESSMENT'] => array(
+        'title' => 'Workplace Characteristics',
+        'pre_help' => 'Please note how strongly you agree or disagree with each statement about your workplace',
+      ),
+    );
+
+    return $this->_customGroupProperties;
+  }
+
+  /**
+   * Generate table names of the form, 'civicrm_value_<name>_<id>'
+   * and assign to the table_name key of each group array.
+   *
+   * @param array $arrCustomGroups of group properties arrays indexed by name
+   */
+  public static function createCustomGroupTableNames(&$arrCustomGroups) {
+    $customIDs = CRM_Utils_Ext_CustomData::getCustomDataNextIDs();
+    $id = $customIDs['civicrm_custom_group'];
+    
+    foreach ($arrCustomGroups as $name => $group) {
+       $group['table_name'] = "civicrm_value_{$name}_{$id}";
+      $id = $id++;
+    }
+  }
+
   /**
    *
    */
@@ -22,17 +120,10 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     self::createActivityTypes($typesConf);
 
-    // due to quirks in CiviCase, it's best if the name is the lowercased,
-    // underscored version of the label
     $caseTypeLabel = ts('Workplace Policy Enrollment', array('domain' => 'org.drugfreepa.enrollment'));
 
-    self::createCaseType(CRM_Enrollment_BAO_Enrollment::POLICY_CASE_TYPE, $caseTypeLabel);
+    self::createCaseType('DFWPSEnrollment', $caseTypeLabel);
 
-    CRM_Listener_Registry::addListener(
-      'CRM_Enrollment_Listener_Event_CaseActivityCompleted',
-      'CRM_Enrollment_Listener_Listener_UpdateWorkflowDueDates',
-      'org.drugfreepa.enrollment'
-    );
   }
 
   /**
@@ -47,6 +138,15 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
    */
   public function enable() {
     $this->setComponentStatuses(array('CiviCase' => TRUE));
+
+    $this->createChecklistCustomData();
+
+    $profile_id = self::createChecklistProfile();
+    foreach (array_keys(self::getCustomGroupProperties()) as $name) {
+      CRM_Utils_Ext_CustomData::profileAddCustomGroupFields(
+       $profile_id , $name
+      );
+    }
   }
 
   /**
@@ -58,6 +158,37 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
 
    */
+
+  private function createChecklistCustomData() {
+    $smarty = CRM_Core_Smarty::singleton();
+    $customIDs = CRM_Utils_Ext_CustomData::getCustomDataNextIDs();
+    $smarty->assign('customIDs', $customIDs);
+    $smarty->assign('customGroups', $this->getCustomGroupProperties());
+    $smarty->assign('customGroupNames', $this->getCustomGroupNames());
+    
+    CRM_Utils_Ext_CustomData::executeCustomDataTemplateFile('checklist_custom_data.xml.tpl');
+  }
+
+  private static function createChecklistProfile() {
+    $params = array(
+      'version' => 3,
+      'sequential' => 1,
+      'group_type' => 'Activity',
+      'title' => ts('Policy Checklist', 'org.drugfreepa.enrollment'),
+      'is_update_dupe' => 1,
+      'is_cms_user' => 0, //CHANGE ME?
+      'is_reserved' => 0,
+    );
+    $api_result = civicrm_api('UFGroup', 'create', $params);
+
+    if ($api_result['is_error'] == 1) {
+      $profile_id = null;
+    } else {
+      $profile_id = $api_result['id'];
+    }
+
+    return $profile_id;
+  }
 
   /**
    * Creates activity types from a list of name => labels
@@ -74,66 +205,10 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     $activityTypeIDs = array();
     foreach ($typesConf as $activity => $label) {
-      $activityTypeIDs[] = self::safeCreateOptionValue($optionGroup, $activity, $label);
+      $activityTypeIDs[] = CRM_Utils_Ext_CustomData::safeCreateOptionValue($optionGroup, $activity, $label);
     }
 
     return $activityTypeIDs;
-  }
-
-  /**
-   * Create new Option Value with a check based on name.
-   * Returns the activity type ID
-   *
-   * @param array/int $optionGroup result of api OptionGroup Get, OR int Group ID
-   * @param string $optionName
-   * @param string $optionLabel
-   * @param string $newValue Optional
-   *
-   * @return int $value
-   *
-   * @throws API_Exception
-   */
-  public static function safeCreateOptionValue($optionGroup, $optionName, $optionLabel, $newValue = null) {
-
-    if (is_numeric($optionGroup)) {
-      $group_id = $optionGroup;
-    } else {
-      $group_id = $optionGroup['id'];
-    }
-
-    $optionValue = civicrm_api('OptionValue', 'GetValue', array(
-      'version' => 3,
-      'name' => $optionName,
-      'option_group_id' => $group_id,
-      'return' => 'value'
-    ));
-
-    if (CRM_Utils_Array::value('is_error', $optionValue) === NULL) {
-      // already exists, do nothing.
-      return $optionValue['result'];
-    }
-
-    $params = array(
-      'version' => 3,
-      'name' => $optionName,
-      'label' => $optionLabel,
-      'option_group_id' => $group_id,
-    );
-
-    if(!is_null($newValue)) {
-      $params['value'] = $newValue;
-    }
-
-    try {
-      $result = civicrm_api3('OptionValue', 'create', $params);
-    } catch (CiviCRM_API3_Exception $x) {
-      throw new API_Exception(
-        'Exception in safeCreateOptionValue. API3_Exception: '.$x->getMessage()
-        , $x->getErrorCode(), $x->getExtraParams(), $x
-        );
-    }
-
-    return $result['values'][$result['id']]['value'];
   }
 
   /**
@@ -150,7 +225,7 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
       'return' => 'id'
     ));
 
-    return self::safeCreateOptionValue($optionGroup, $typeName, $typeLabel);
+    return CRM_Utils_Ext_CustomData::safeCreateOptionValue($optionGroup, $typeName, $typeLabel);
   }
 
   /**
