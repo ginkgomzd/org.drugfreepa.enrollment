@@ -12,7 +12,7 @@
       <collapse_display>0</collapse_display>
       <help_pre>{$group.pre_help}</help_pre>
       <help_post></help_post>
-      <weight>1</weight>
+      <weight>{counter name='group_weight'}</weight>
       <is_active>1</is_active>
       <table_name>{$group.table_name}</table_name>
       <is_multiple>0</is_multiple>

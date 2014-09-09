@@ -122,7 +122,7 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
 
     $caseTypeLabel = ts('Workplace Policy Enrollment', array('domain' => 'org.drugfreepa.enrollment'));
 
-    self::createCaseType('DFWPSEnrollment', $caseTypeLabel);
+    self::createCaseType('WorkplacePolicyEnrollment', $caseTypeLabel);
 
   }
 
@@ -140,13 +140,6 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
     $this->setComponentStatuses(array('CiviCase' => TRUE));
 
     $this->createChecklistCustomData();
-
-    $profile_id = self::createChecklistProfile();
-    foreach (array_keys(self::getCustomGroupProperties()) as $name) {
-      CRM_Utils_Ext_CustomData::profileAddCustomGroupFields(
-       $profile_id , $name
-      );
-    }
   }
 
   /**
@@ -167,27 +160,6 @@ class CRM_Enrollment_Upgrader extends CRM_Enrollment_Upgrader_Base {
     $smarty->assign('customGroupNames', $this->getCustomGroupNames());
     
     CRM_Utils_Ext_CustomData::executeCustomDataTemplateFile('checklist_custom_data.xml.tpl');
-  }
-
-  private static function createChecklistProfile() {
-    $params = array(
-      'version' => 3,
-      'sequential' => 1,
-      'group_type' => 'Activity',
-      'title' => ts('Policy Checklist', 'org.drugfreepa.enrollment'),
-      'is_update_dupe' => 1,
-      'is_cms_user' => 0, //CHANGE ME?
-      'is_reserved' => 0,
-    );
-    $api_result = civicrm_api('UFGroup', 'create', $params);
-
-    if ($api_result['is_error'] == 1) {
-      $profile_id = null;
-    } else {
-      $profile_id = $api_result['id'];
-    }
-
-    return $profile_id;
   }
 
   /**
